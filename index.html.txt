@@ -1,0 +1,430 @@
+import { useState } from "react";
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+const COURSES = [
+  { id: 1, title: "Complete Web Development Bootcamp", instructor: "John Smith", instructorId: 1, rating: 4.8, reviews: 120, price: 49.99, category: "Development", image: "💻", color: "#1a1a2e", progress: 65, enrolled: true, hours: 10, articles: 5, resources: 8 },
+  { id: 2, title: "UI/UX Design Masterclass", instructor: "Sarah Johnson", instructorId: 2, rating: 4.7, reviews: 98, price: 59.99, category: "Design", image: "🎨", color: "#0d1b2a", progress: 40, enrolled: true, hours: 8, articles: 3, resources: 6 },
+  { id: 3, title: "Python for Data Science", instructor: "Mike Brown", instructorId: 3, rating: 4.6, reviews: 210, price: 44.99, category: "Development", image: "🐍", color: "#1b2a1a", progress: 66, enrolled: true, hours: 12, articles: 7, resources: 10 },
+  { id: 4, title: "Digital Marketing Complete Guide", instructor: "Emma Davis", instructorId: 4, rating: 4.5, reviews: 175, price: 39.99, category: "Business", image: "📊", color: "#2a1a1a", progress: 20, enrolled: true, hours: 6, articles: 4, resources: 5 },
+  { id: 5, title: "Advanced JavaScript Masterclass", instructor: "John Smith", instructorId: 1, rating: 4.9, reviews: 302, price: 54.99, category: "Development", image: "⚡", color: "#1a1a2e", progress: 0, enrolled: false, hours: 14, articles: 6, resources: 9 },
+  { id: 6, title: "Brand Identity Design", instructor: "Sarah Johnson", instructorId: 2, rating: 4.8, reviews: 88, price: 49.99, category: "Design", image: "✏️", color: "#0d1b2a", progress: 0, enrolled: false, hours: 7, articles: 2, resources: 4 },
+];
+
+const INSTRUCTORS = [
+  { id: 1, name: "John Smith", title: "Senior Web Developer & Instructor", rating: 4.8, reviews: 230, courses: 12, students: "8K+", years: "5+", avatar: "👨‍💻", bio: "Passionate web developer with 8+ years of experience in teaching and building modern web applications." },
+  { id: 2, name: "Sarah Johnson", title: "UI/UX Designer & Instructor", rating: 4.9, reviews: 185, courses: 8, students: "6K+", years: "4+", avatar: "👩‍🎨", bio: "Award-winning designer with a passion for creating intuitive and beautiful digital experiences." },
+  { id: 3, name: "Mike Brown", title: "Data Scientist & Instructor", rating: 4.7, reviews: 312, courses: 15, students: "12K+", years: "7+", avatar: "👨‍🔬", bio: "Data scientist and ML engineer helping thousands master Python and data analysis." },
+  { id: 4, name: "Emma Davis", title: "Marketing Strategist & Instructor", rating: 4.6, reviews: 198, courses: 6, students: "5K+", years: "6+", avatar: "👩‍💼", bio: "Digital marketing expert who has helped 100+ brands grow their online presence." },
+];
+
+const CATEGORIES = ["All", "Development", "Design", "Business", "Marketing", "Data Science"];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const Stars = ({ rating }) => (
+  <span style={{ color: "#f59e0b", fontSize: 13 }}>
+    {"★".repeat(Math.floor(rating))}{"☆".repeat(5 - Math.floor(rating))}
+    <span style={{ color: "#94a3b8", marginLeft: 4, fontSize: 12 }}>{rating}</span>
+  </span>
+);
+
+const CourseCard = ({ course, onClick }) => (
+  <div onClick={() => onClick(course)} style={{ background: "#1e293b", borderRadius: 16, overflow: "hidden", cursor: "pointer", transition: "transform .18s, box-shadow .18s", boxShadow: "0 2px 12px #0002" }}
+    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 8px 32px #6366f133"; }}
+    onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 2px 12px #0002"; }}>
+    <div style={{ background: course.color, height: 120, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48 }}>{course.image}</div>
+    <div style={{ padding: "14px 16px 16px" }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 4, lineHeight: 1.35 }}>{course.title}</div>
+      <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 6 }}>{course.instructor}</div>
+      <Stars rating={course.rating} />
+      <div style={{ marginTop: 8, fontWeight: 700, color: "#6366f1" }}>${course.price}</div>
+    </div>
+  </div>
+);
+
+const ProgressBar = ({ value, color = "#6366f1" }) => (
+  <div style={{ background: "#334155", borderRadius: 99, height: 5, overflow: "hidden", margin: "4px 0 2px" }}>
+    <div style={{ width: ${value}%, background: color, height: "100%", borderRadius: 99, transition: "width .4s" }} />
+  </div>
+);
+
+// ── Pages ─────────────────────────────────────────────────────────────────────
+
+function HomePage({ navigate }) {
+  return (
+    <div style={{ overflowY: "auto", height: "100%" }}>
+      {/* Hero */}
+      <div style={{ background: "linear-gradient(135deg,#6366f1 0%,#8b5cf6 60%,#a78bfa 100%)", padding: "32px 20px 40px", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", right: -20, top: -20, width: 180, height: 180, borderRadius: "50%", background: "#ffffff15" }} />
+        <div style={{ position: "absolute", right: 40, bottom: -40, width: 120, height: 120, borderRadius: "50%", background: "#ffffff10" }} />
+        <div style={{ fontSize: 26, fontWeight: 800, color: "#fff", lineHeight: 1.25, marginBottom: 10 }}>Learn Anything,<br />Achieve Everything</div>
+        <div style={{ fontSize: 13, color: "#e0e7ff", marginBottom: 20 }}>Join thousands of learners and start your journey</div>
+        <button onClick={() => navigate("courses")} style={{ background: "#fff", color: "#6366f1", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Explore Courses</button>
+        <div style={{ display: "flex", gap: 6, marginTop: 16 }}>
+          {[1, 0, 0].map((a, i) => <div key={i} style={{ width: a ? 20 : 8, height: 8, borderRadius: 99, background: a ? "#fff" : "#ffffff60" }} />)}
+        </div>
+      </div>
+      {/* Categories */}
+      <div style={{ padding: "20px 20px 0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ fontWeight: 700, color: "#fff", fontSize: 15 }}>Categories</div>
+          <span style={{ color: "#6366f1", fontSize: 13, cursor: "pointer" }} onClick={() => navigate("courses")}>See all</span>
+        </div>
+        <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4 }}>
+          {[["💻", "Development"], ["🎨", "Design"], ["💼", "Business"], ["📣", "Marketing"], ["📊", "Data Science"]].map(([icon, label]) => (
+            <div key={label} onClick={() => navigate("courses")} style={{ flex: "0 0 auto", textAlign: "center", cursor: "pointer" }}>
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 4 }}>{icon}</div>
+              <div style={{ fontSize: 10, color: "#94a3b8" }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Popular Courses */}
+      <div style={{ padding: "20px 20px 24px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ fontWeight: 700, color: "#fff", fontSize: 15 }}>Popular Courses</div>
+          <span style={{ color: "#6366f1", fontSize: 13, cursor: "pointer" }} onClick={() => navigate("courses")}>See all</span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {COURSES.slice(0, 3).map(c => (
+            <div key={c.id} onClick={() => navigate("course-detail", c)} style={{ display: "flex", gap: 12, background: "#1e293b", borderRadius: 14, padding: 12, cursor: "pointer", alignItems: "center" }}>
+              <div style={{ width: 56, height: 56, borderRadius: 10, background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0 }}>{c.image}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</div>
+                <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>{c.instructor}</div>
+                <Stars rating={c.rating} />
+              </div>
+              <div style={{ color: "#94a3b8", fontSize: 18, flexShrink: 0 }}>🔖</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CoursesPage({ navigate }) {
+  const [cat, setCat] = useState("All");
+  const [query, setQuery] = useState("");
+  const filtered = COURSES.filter(c => (cat === "All" || c.category === cat) && c.title.toLowerCase().includes(query.toLowerCase()));
+  return (
+    <div style={{ overflowY: "auto", height: "100%", padding: "16px 16px 24px" }}>
+      <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 14 }}>All Courses</div>
+      <div style={{ position: "relative", marginBottom: 16 }}>
+        <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: "#94a3b8" }}>🔍</span>
+        <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search courses..." style={{ width: "100%", padding: "11px 12px 11px 36px", borderRadius: 12, border: "none", background: "#1e293b", color: "#fff", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+      </div>
+      <div style={{ display: "flex", gap: 8, overflowX: "auto", marginBottom: 20, paddingBottom: 4 }}>
+        {CATEGORIES.map(c => (
+          <button key={c} onClick={() => setCat(c)} style={{ flexShrink: 0, padding: "7px 16px", borderRadius: 99, border: "none", background: cat === c ? "#6366f1" : "#1e293b", color: cat === c ? "#fff" : "#94a3b8", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{c}</button>
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {filtered.map(c => <CourseCard key={c.id} course={c} onClick={c => navigate("course-detail", c)} />)}
+      </div>
+      {filtered.length === 0 && <div style={{ color: "#64748b", textAlign: "center", marginTop: 40 }}>No courses found</div>}
+    </div>
+  );
+}
+
+function CourseDetailPage({ course, navigate }) {
+  const [tab, setTab] = useState("About");
+  const instructor = INSTRUCTORS.find(i => i.id === course.instructorId);
+  const tabs = ["About", "Curriculum", "Instructor", "Reviews"];
+  return (
+    <div style={{ overflowY: "auto", height: "100%" }}>
+      <div style={{ background: course.color, height: 200, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 72, position: "relative" }}>
+        {course.image}
+        <button style={{ position: "absolute", top: 16, left: 16, background: "#ffffff20", border: "none", borderRadius: 99, width: 36, height: 36, color: "#fff", fontSize: 18, cursor: "pointer" }} onClick={() => navigate("courses")}>‹</button>
+        <button style={{ position: "absolute", top: 16, right: 16, background: "#ffffff20", border: "none", borderRadius: 99, width: 36, height: 36, color: "#fff", fontSize: 18, cursor: "pointer" }}>🔖</button>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#ffffff25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, cursor: "pointer" }}>▶️</div>
+        </div>
+      </div>
+      <div style={{ padding: "20px 20px 100px" }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 6 }}>{course.title}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+          <span style={{ fontSize: 12, color: "#94a3b8" }}>{course.instructor}</span>
+          <Stars rating={course.rating} />
+          <span style={{ fontSize: 12, color: "#64748b" }}>({course.reviews})</span>
+        </div>
+        {/* Tabs */}
+        <div style={{ display: "flex", borderBottom: "1px solid #334155", marginBottom: 16 }}>
+          {tabs.map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, background: "none", border: "none", padding: "10px 0", color: tab === t ? "#6366f1" : "#64748b", fontWeight: tab === t ? 700 : 500, fontSize: 12, cursor: "pointer", borderBottom: tab === t ? "2px solid #6366f1" : "2px solid transparent" }}>{t}</button>
+          ))}
+        </div>
+        {tab === "About" && (
+          <>
+            <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>Learn HTML, CSS, JavaScript, React, Node.js and more to become a full-stack web developer.</p>
+            {[["🕐", ${course.hours} hours on-demand video], ["📄", ${course.articles} Articles], ["⬇️", ${course.resources} Downloadable resources], ["♾️", "Full lifetime access"]].map(([i, t]) => (
+              <div key={t} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, color: "#cbd5e1", fontSize: 13 }}><span>{i}</span>{t}</div>
+            ))}
+          </>
+        )}
+        {tab === "Curriculum" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {["Introduction & Setup", "HTML Fundamentals", "CSS & Flexbox", "JavaScript Basics", "React Deep Dive", "Node.js & Express", "MongoDB & Databases", "Final Project"].map((s, i) => (
+              <div key={i} style={{ background: "#1e293b", borderRadius: 10, padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: i < 3 ? "#6366f1" : "#334155", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", fontWeight: 700 }}>{i < 3 ? "✓" : i + 1}</div>
+                  <span style={{ fontSize: 13, color: "#e2e8f0" }}>{s}</span>
+                </div>
+                <span style={{ fontSize: 11, color: "#64748b" }}>{20 + ((i * 7) % 40)} min</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {tab === "Instructor" && instructor && (
+          <div>
+            <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 16 }}>
+              <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#334155", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>{instructor.avatar}</div>
+              <div>
+                <div style={{ fontWeight: 700, color: "#fff", fontSize: 16 }}>{instructor.name}</div>
+                <div style={{ fontSize: 12, color: "#94a3b8" }}>{instructor.title}</div>
+                <Stars rating={instructor.rating} />
+              </div>
+            </div>
+            <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.6 }}>{instructor.bio}</p>
+            <button onClick={() => navigate("instructor", instructor)} style={{ marginTop: 12, background: "#6366f1", color: "#fff", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>View Profile</button>
+          </div>
+        )}
+        {tab === "Reviews" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {["Great course! Learned so much in just a few weeks.", "The instructor explains concepts really clearly.", "Best investment I've made in my career.", "Highly recommend for beginners and intermediates."].map((r, i) => (
+              <div key={i} style={{ background: "#1e293b", borderRadius: 12, padding: "12px 14px" }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#334155", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>👤</div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Student {i + 1}</div>
+                    <Stars rating={5 - (i % 2) * 0.5} />
+                  </div>
+                </div>
+                <p style={{ fontSize: 12, color: "#94a3b8", margin: 0 }}>{r}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Sticky CTA */}
+      <div style={{ position: "sticky", bottom: 0, background: "#0f172a", padding: "14px 20px", borderTop: "1px solid #1e293b", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>${course.price}</div>
+        <button style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 12, padding: "13px 32px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>{course.enrolled ? "Continue Learning" : "Enroll Now"}</button>
+      </div>
+    </div>
+  );
+}
+
+function MyLearningPage({ navigate }) {
+  const [tab, setTab] = useState("In Progress");
+  const enrolled = COURSES.filter(c => c.enrolled);
+  const inProgress = enrolled.filter(c => c.progress > 0 && c.progress < 100);
+  const completed = enrolled.filter(c => c.progress === 100);
+  const saved = COURSES.filter(c => !c.enrolled).slice(0, 2);
+  const list = tab === "In Progress" ? inProgress : tab === "Completed" ? completed : saved;
+  return (
+    <div style={{ overflowY: "auto", height: "100%", padding: "16px 16px 24px" }}>
+      <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 16 }}>My Learning</div>
+      <div style={{ display: "flex", background: "#1e293b", borderRadius: 12, padding: 4, marginBottom: 20, gap: 4 }}>
+        {["In Progress", "Completed", "Saved"].map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "8px 0", borderRadius: 9, border: "none", background: tab === t ? "#6366f1" : "none", color: tab === t ? "#fff" : "#64748b", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{t}</button>
+        ))}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {list.length === 0 && <div style={{ color: "#64748b", textAlign: "center", marginTop: 40 }}>Nothing here yet</div>}
+        {list.map(c => (
+          <div key={c.id} onClick={() => navigate("course-detail", c)} style={{ display: "flex", gap: 12, background: "#1e293b", borderRadius: 16, padding: 12, cursor: "pointer", alignItems: "flex-start" }}>
+            <div style={{ width: 80, height: 70, borderRadius: 10, background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, flexShrink: 0 }}>{c.image}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 4, lineHeight: 1.3 }}>{c.title}</div>
+              {tab === "In Progress" && (
+                <>
+                  <ProgressBar value={c.progress} />
+                  <div style={{ fontSize: 11, color: "#6366f1" }}>{c.progress}% Complete</div>
+                </>
+              )}
+              {tab === "Saved" && <div style={{ fontSize: 12, color: "#94a3b8" }}>${c.price}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InstructorPage({ instructor, navigate }) {
+  const courses = COURSES.filter(c => c.instructorId === instructor.id);
+  const stats = [
+    ["⭐", instructor.rating, "Rating"],
+    ["👥", instructor.students, "Students"],
+    ["🎬", instructor.courses, "Courses"],
+    ["📅", instructor.years, "Experience"],
+  ];
+  return (
+    <div style={{ overflowY: "auto", height: "100%" }}>
+      <div style={{ background: "linear-gradient(180deg,#1e293b 0%,#0f172a 100%)", padding: "20px 20px 24px" }}>
+        <button style={{ background: "none", border: "none", color: "#94a3b8", fontSize: 22, cursor: "pointer", marginBottom: 10 }} onClick={() => navigate("courses")}>‹</button>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 88, height: 88, borderRadius: "50%", background: "#334155", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, margin: "0 auto 12px" }}>{instructor.avatar}</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{instructor.name}</div>
+          <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8 }}>{instructor.title}</div>
+          <Stars rating={instructor.rating} />
+          <span style={{ fontSize: 12, color: "#64748b", marginLeft: 4 }}>({instructor.reviews} reviews)</span>
+        </div>
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 22 }}>
+          {stats.map(([icon, val, label]) => (
+            <div key={label} style={{ background: "#1e293b", borderRadius: 12, padding: "12px 6px", textAlign: "center" }}>
+              <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{val}</div>
+              <div style={{ fontSize: 9, color: "#64748b" }}>{label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ fontWeight: 700, color: "#fff", fontSize: 14, marginBottom: 10 }}>About</div>
+        <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.6, marginBottom: 22 }}>{instructor.bio}</p>
+
+        <div style={{ fontWeight: 700, color: "#fff", fontSize: 14, marginBottom: 12 }}>Courses by {instructor.name.split(" ")[0]}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {courses.map(c => (
+            <div key={c.id} onClick={() => navigate("course-detail", c)} style={{ display: "flex", gap: 12, background: "#1e293b", borderRadius: 14, padding: 12, cursor: "pointer", alignItems: "center" }}>
+              <div style={{ width: 56, height: 56, borderRadius: 10, background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0 }}>{c.image}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</div>
+                <Stars rating={c.rating} />
+                <div style={{ marginTop: 4, fontWeight: 700, color: "#6366f1", fontSize: 12 }}>${c.price}</div>
+              </div>
+            </div>
+          ))}
+          {courses.length === 0 && <div style={{ color: "#64748b", textAlign: "center", marginTop: 20 }}>No courses yet</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfilePage({ navigate }) {
+  const enrolled = COURSES.filter(c => c.enrolled);
+  const menu = [
+    ["📚", "My Learning", () => navigate("my-learning")],
+    ["🔖", "Saved Courses", () => navigate("my-learning")],
+    ["💳", "Payment Methods", null],
+    ["🔔", "Notifications", null],
+    ["⚙️", "Settings", null],
+    ["❓", "Help & Support", null],
+  ];
+  return (
+    <div style={{ overflowY: "auto", height: "100%", padding: "20px 20px 24px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#334155", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>🧑</div>
+        <div>
+          <div style={{ fontWeight: 700, color: "#fff", fontSize: 16 }}>Alex Rivera</div>
+          <div style={{ fontSize: 12, color: "#94a3b8" }}>alex.rivera@email.com</div>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
+        <div style={{ background: "#1e293b", borderRadius: 12, padding: 14, textAlign: "center" }}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>{enrolled.length}</div>
+          <div style={{ fontSize: 11, color: "#64748b" }}>Enrolled Courses</div>
+        </div>
+        <div style={{ background: "#1e293b", borderRadius: 12, padding: 14, textAlign: "center" }}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>{enrolled.filter(c => c.progress === 100).length}</div>
+          <div style={{ fontSize: 11, color: "#64748b" }}>Completed</div>
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {menu.map(([icon, label, action]) => (
+          <div key={label} onClick={action || undefined} style={{ display: "flex", alignItems: "center", gap: 12, background: "#1e293b", borderRadius: 12, padding: "13px 14px", cursor: action ? "pointer" : "default" }}>
+            <span style={{ fontSize: 16 }}>{icon}</span>
+            <span style={{ flex: 1, fontSize: 13, color: "#e2e8f0", fontWeight: 500 }}>{label}</span>
+            <span style={{ color: "#475569" }}>›</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Bottom Navigation ─────────────────────────────────────────────────────────
+const NAV_ITEMS = [
+  ["home", "🏠", "Home"],
+  ["courses", "📚", "Courses"],
+  ["my-learning", "🎓", "Learning"],
+  ["profile", "🧑", "Profile"],
+];
+
+function BottomNav({ active, navigate }) {
+  return (
+    <div style={{ display: "flex", background: "#0f172a", borderTop: "1px solid #1e293b", padding: "8px 0 10px", flexShrink: 0 }}>
+      {NAV_ITEMS.map(([key, icon, label]) => {
+        const isActive = active === key;
+        return (
+          <div key={key} onClick={() => navigate(key)} style={{ flex: 1, textAlign: "center", cursor: "pointer" }}>
+            <div style={{ fontSize: 18, opacity: isActive ? 1 : 0.5 }}>{icon}</div>
+            <div style={{ fontSize: 10, marginTop: 2, color: isActive ? "#6366f1" : "#64748b", fontWeight: isActive ? 700 : 500 }}>{label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── App Shell ─────────────────────────────────────────────────────────────────
+export default function EduApp() {
+  const [page, setPage] = useState("home");
+  const [selectedCourse, setSelectedCourse] = useState(COURSES[0]);
+  const [selectedInstructor, setSelectedInstructor] = useState(INSTRUCTORS[0]);
+
+  const navigate = (target, payload) => {
+    if (target === "course-detail" && payload) setSelectedCourse(payload);
+    if (target === "instructor" && payload) setSelectedInstructor(payload);
+    setPage(target);
+  };
+
+  // Pages that still count as their parent tab for the bottom nav highlight
+  const navKey =
+    page === "course-detail" || page === "instructor" ? "courses" :
+    NAV_ITEMS.some(([k]) => k === page) ? page : "home";
+
+  let content;
+  switch (page) {
+    case "courses":
+      content = <CoursesPage navigate={navigate} />;
+      break;
+    case "course-detail":
+      content = <CourseDetailPage course={selectedCourse} navigate={navigate} />;
+      break;
+    case "instructor":
+      content = <InstructorPage instructor={selectedInstructor} navigate={navigate} />;
+      break;
+    case "my-learning":
+      content = <MyLearningPage navigate={navigate} />;
+      break;
+    case "profile":
+      content = <ProfilePage navigate={navigate} />;
+      break;
+    default:
+      content = <HomePage navigate={navigate} />;
+  }
+
+  return (
+    <div style={{
+      width: "100%",
+      maxWidth: 420,
+      height: 780,
+      margin: "0 auto",
+      background: "#0f172a",
+      borderRadius: 28,
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+      boxShadow: "0 20px 60px #0006",
+    }}>
+      <div style={{ flex: 1, minHeight: 0 }}>{content}</div>
+      <BottomNav active={navKey} navigate={navigate} />
+    </div>
+  );
+}
